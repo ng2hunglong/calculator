@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Calculator</title>
+    <script src="angular.js"></script>
+    <link rel="stylesheet" href="calculator.css">
+    <script language="javascript" src="calculator.js"></script>
+</head>
+<body ng-app = "myApp" ng-controller = "myControl">
+    <div class="container">
+        <div class="result">
+            <div class="formula">
+                <span id = "formula-child">{{num2}}  {{operator}}</span>
+            </div>
+            <div class="number">
+                <span id="number-child" >{{num1}} </span>
+            </div>
+                
+        </div>
+        <div class="calculation">
+            <div class="line1">
+                <span ng-click="clearCE()"><p>CE</p></span>
+                <span ng-click="clearC()"><p>C</p></span>
+                <span ng-click="back()"><p>back</p></span>
+                <span ng-click="updateOperator('/')"><p>&divide;</p></span>
+            </div>
+                
+            <div class="line2">
+                <span ng-click="updateNumber('7')"><p>7</p></span>
+                <span ng-click="updateNumber('8')"><p>8</p></span>
+                <span ng-click="updateNumber('9')"><p>9</p></span>
+                <span ng-click="updateOperator('x')"><p>x</p></span>
+            </div>
+                
+            <div class="line3">
+                <span ng-click="updateNumber('4')"><p>4</p></span>
+                <span ng-click="updateNumber('5')"><p>5</p></span>
+                <span ng-click="updateNumber('6')"><p>6</p></span>
+                <span ng-click="updateOperator('-')"><p>-</p></span>
+            </div>
+                
+            <div class="line4">
+                <span ng-click="updateNumber('1')"><p>1</p></span>
+                <span ng-click="updateNumber('2')"><p>2</p></span>
+                <span ng-click="updateNumber('3')"><p>3</p></span>
+                <span ng-click="updateOperator('+')"><p>+</p></span>
+            </div>
+                
+            <div class="line5">
+                <span ng-click="negate()"><p>&plusmn;</p></span>
+                <span ng-click="updateNumber('0')"><p>0</p></span>
+                <span ng-click="updateDot()"><p>.</p></span>
+                <span ng-click="updateResult()"><p>=</p></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var myApp = angular.module("myApp", []);
+        myApp.controller('myControl', function($scope) {
+            $scope.num1 = 0;
+            $scope.num2 = 0;
+            $scope.operator = null; 
+            var dot = 0;
+            var num1Change = 0;
+           
+            $scope.updateNumber = function(butn) {
+                num1Change = 1;
+                if($scope.num1 === 0) {
+                    $scope.num1 = String(butn);
+                }
+                else if($scope.num1 != '0' && $scope.num1.length < 16) {
+                    $scope.num1 += String(butn);
+                }
+            };
+            $scope.updateOperator = function(op) {
+                if(num1Change === 0) {
+                    $scope.operator = String(op);
+                } else if(num1Change === 1) {
+                    calculate($scope.operator);
+                    $scope.num1 = 0;
+                    dot = 0;
+                    num1Change = 0;
+                    $scope.operator = String(op);
+                }
+
+            }
+            function calculate(butn) {
+                if(butn === 'x') {
+                    $scope.num2 *= parseFloat($scope.num1);
+                }
+                else if(butn === '/') {
+                    $scope.num2 /= parseFloat($scope.num1);
+                }
+                else if(butn === '+') {
+                    $scope.num2 += parseFloat($scope.num1);
+                }
+                else if(butn === '-') {
+                    $scope.num2 -= parseFloat($scope.num1);
+                }
+                else {
+                    $scope.num2 = parseFloat($scope.num1);
+                }
+            }
+            $scope.updateResult = function() {
+                calculate($scope.operator);
+                $scope.num1 = 0;
+                dot = 0;
+                num1Change = 0;
+                $scope.operator = null;
+
+            }
+            // Hàm phụ: đổi số âm thành số dương
+            $scope.negate = function() {
+                if(parseFloat($scope.num1)<0) {
+                    $scope.num1 = $scope.num1.substring(1,$scope.num1.length);
+                }
+                else if(parseFloat($scope.num1)>0) {
+                    $scope.num1 = String("-" + $scope.num1);
+                }
+            }
+            // Hàm thêm dấu . phần thập phân
+            $scope.updateDot = function() {
+                if(dot === 0) { 
+                    $scope.num1 += '.';
+                    dot = 1;
+                }
+            }
+            // Hàm xóa num1;
+            $scope.clearCE = function() {
+                $scope.num1 = 0;
+                dot = 0;
+                num1Change = 0;
+            };
+            // Hàm xóa num1, num2 và phép toán
+            $scope.clearC = function() {
+                $scope.num1 = 0;
+                dot = 0;
+                num1Change = 0;
+                $scope.num2 = 0;
+                $scope.operator = null;
+                operationCount = 0;
+            }
+            // hàm xóa ký tự cuối của num1
+            $scope.back = function() {
+                if($scope.num1.length < 2 || $scope.num1 === '-0.' ) {
+                    $scope.num1 = 0;
+                    dot = 0;
+                }
+                else if($scope.num1.length === 2 && $scope.num1.slice(0,1) === '-') {
+                    $scope.num1 = 0;
+                }
+                else if($scope.num1.length >= 2) {
+                    let lastnum1 = $scope.num1.slice(-1);
+                    if(lastnum1 === '.') {
+                        dot = 0;
+                    }
+                    $scope.num1 = $scope.num1.substring(0, $scope.num1.length-1)
+                }
+                /*hàm slice và substring tương tự nhau.
+                 nhưng có 3 điểm khác biệt, tra gg*/
+            }
+        });
+    </script>
+</body>
+</html>
